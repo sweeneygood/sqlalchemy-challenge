@@ -51,7 +51,7 @@ def index():
             f"/api/v1.0/stations<br/>"
             f"/api/v1.0/tobs<br/>"
             f"/api/v1.0/startdate/<br/>"
-            f"/api/v1.0/startdate/enddate"
+            f"/api/v1.0/startdate/enddate - Enter dates in format YYYY-MM-DD"
             f"<hr>")
             
 
@@ -88,11 +88,15 @@ def stations():
 
 @app.route("/api/v1.0/tobs")
 def tobs():
-#This route returns temperature data 
+#This route returns dates and temperature observations 
+# of the most active station for the last year of data
 
     session = Session(engine)
     
-    results = session.query(Measurement.date, Measurement.tobs).all()
+    results = session.query(Measurement.date, Measurement.tobs).\
+                filter(Measurement.date >= "2016-08-23").\
+                filter(Measurement.date <= "2017-08-23").\
+                filter(Measurement.station == "USC00519281").all()
     
     session.close()
 
@@ -124,6 +128,9 @@ def datefilter(start, end=None):
     except ValueError as ex:
         return jsonify({'start date error': str(ex)}), 400   # jsonify, if this is a json api
  
+
+# tempstats is a function that takes a start and end date 
+# and returns the measuerment data in that timeframe
 
 def tempstats(start,end):
     session = Session(engine)
